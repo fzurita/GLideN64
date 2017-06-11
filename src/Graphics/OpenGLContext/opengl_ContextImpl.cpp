@@ -20,7 +20,7 @@ using namespace opengl;
 
 ContextImpl::ContextImpl()
 {
-	initGLFunctions();
+
 }
 
 
