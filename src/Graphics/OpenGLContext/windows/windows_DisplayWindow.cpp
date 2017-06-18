@@ -36,11 +36,7 @@ DisplayWindow & DisplayWindow::get()
 
 bool DisplayWindowWindows::_start()
 {
-#ifndef GL_DEBUG
-	if (config.video.threadedVideo) {
-		FunctionWrapper::setThreadedMode();
-	}
-#endif
+	FunctionWrapper::setThreadedMode(config.video.threadedVideo);
 
 	FunctionWrapper::windowsStart();
 	return _resizeWindow();
