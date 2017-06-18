@@ -108,6 +108,7 @@ void ConfigDialog::_init()
 	ui->anisotropicSlider->setValue(config.texture.maxAnisotropy);
 	ui->cacheSizeSpinBox->setValue(config.texture.maxBytes / gc_uMegabyte);
 	ui->vSyncCheckBox->setChecked(config.video.verticalSync != 0);
+	ui->vThreadedVideoCheckBox->setChecked(config.video.threadedVideo != 0);
 
 	switch (config.texture.bilinearMode) {
 	case BILINEAR_3POINT:
@@ -400,6 +401,8 @@ void ConfigDialog::accept()
 	}
 
 	config.video.verticalSync = ui->vSyncCheckBox->isChecked() ? 1 : 0;
+
+	config.video.threadedVideo = ui->vThreadedVideoCheckBox->isChecked() ? 1 : 0;
 
 	// Emulation settings
 	config.generalEmulation.enableLOD = ui->emulateLodCheckBox->isChecked() ? 1 : 0;
