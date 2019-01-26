@@ -175,8 +175,12 @@ void ContextImpl::clearColorBuffer(f32 _red, f32 _green, f32 _blue, f32 _alpha)
 		m_cachedFunctions->getCachedClearColor()->setClearColor(_red, _green, _blue, _alpha);
 		FunctionWrapper::glClear(GL_COLOR_BUFFER_BIT);
 	} else {
-		GLfloat values[4] = {_red, _green, _blue, _alpha};
-		FunctionWrapper::glClearBufferfv(GL_COLOR, 0, values);
+		std::unique_ptr<GLfloat[]> values(new GLfloat[4]);
+		values.get()[0] = _red;
+		values.get()[1] = _green;
+		values.get()[2] = _blue;
+		values.get()[3] = _alpha;
+		FunctionWrapper::glClearBufferfv(GL_COLOR, 0, std::move(values));
 	}
 
 	enableScissor->enable(true);
@@ -190,7 +194,7 @@ void ContextImpl::clearDepthBuffer()
 
 	if (m_glInfo.renderer == Renderer::PowerVR) {
 		depthMask->setDepthMask(false);
-		FunctionWrapper:glClear(GL_DEPTH_BUFFER_BIT);
+		FunctionWrapper::glClear(GL_DEPTH_BUFFER_BIT);
 	}
 
 	depthMask->setDepthMask(true);
@@ -285,9 +289,9 @@ u32 ContextImpl::convertInternalTextureFormat(u32 _format) const
 void ContextImpl::textureBarrier()
 {
 	if (m_glInfo.texture_barrier)
-		glTextureBarrier();
+		FunctionWrapper::glTextureBarrier();
 	else if (m_glInfo.texture_barrierNV)
-		glTextureBarrierNV();
+		FunctionWrapper::glTextureBarrierNV();
 }
 
 /*---------------Framebuffer-------------*/
@@ -344,8 +348,13 @@ bool ContextImpl::blitFramebuffers(const graphics::Context::BlitFramebuffersPara
 
 void ContextImpl::setDrawBuffers(u32 _num)
 {
-	GLenum targets[4] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
-	glDrawBuffers(_num, targets);
+	std::unique_ptr<GLenum[]> targets(new GLenum[4]);
+	targets.get()[0] = GL_COLOR_ATTACHMENT0;
+	targets.get()[1] = GL_COLOR_ATTACHMENT1;
+	targets.get()[2] = GL_COLOR_ATTACHMENT2;
+	targets.get()[3] = GL_COLOR_ATTACHMENT3;
+
+	FunctionWrapper::glDrawBuffers(_num, std::move(targets));
 }
 
 graphics::PixelReadBuffer * ContextImpl::createPixelReadBuffer(size_t _sizeInBytes)

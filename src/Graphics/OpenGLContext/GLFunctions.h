@@ -39,7 +39,6 @@ typedef double GLdouble;
 #define IS_GL_FUNCTION_VALID(proc_name) g_##proc_name != nullptr
 
 #if defined(EGL) || defined(OS_IOS)
-
 extern PFNGLBLENDFUNCPROC g_glBlendFunc;
 extern PFNGLPIXELSTOREIPROC g_glPixelStorei;
 extern PFNGLCLEARCOLORPROC g_glClearColor;

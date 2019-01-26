@@ -224,8 +224,8 @@ namespace opengl {
 	class Update2DTexSubImage : public Update2DTexture
 	{
 	public:
-		Update2DTexSubImage(CachedBindTexture* _bind)
-			: m_bind(_bind) {}
+		Update2DTexSubImage(const GLInfo & _glinfo, CachedBindTexture* _bind)
+			: m_glinfo(_glinfo), m_bind(_bind) {}
 
 		void update2DTexture(const graphics::Context::UpdateTextureDataParams & _params) override
 		{

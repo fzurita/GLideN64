@@ -98,7 +98,7 @@ void BufferedDrawer::_updateBuffer(Buffer & _buffer, u32 _count, u32 _dataSize, 
 		memcpy(&_buffer.data[_buffer.offset], _data, _dataSize);
 #ifdef GL_DEBUG
 		m_bindBuffer->bind(Parameter(_buffer.type), ObjectHandle(_buffer.handle));
-		glFlushMappedBufferRange(_buffer.type, _buffer.offset, _dataSize);
+		FunctionWrapper::glFlushMappedBufferRange(_buffer.type, _buffer.offset, _dataSize);
 #endif
 	} else {
 		std::unique_ptr<u8[]> data((new u8[_dataSize]));
@@ -217,7 +217,7 @@ void BufferedDrawer::drawTriangles(const graphics::Context::DrawTriangleParamete
 	}
 
 	u16* indices = (u16*)nullptr + m_trisBuffers.ebo.pos - _params.elementsCount;
-	FunctionWrapper:glDrawRangeElementsBaseVertex(GLenum(_params.mode), 0, _params.verticesCount - 1, _params.elementsCount, GL_UNSIGNED_SHORT,
+	FunctionWrapper::glDrawRangeElementsBaseVertex(GLenum(_params.mode), 0, _params.verticesCount - 1, _params.elementsCount, GL_UNSIGNED_SHORT,
 		indices, m_trisBuffers.vbo.pos - _params.verticesCount);
 }
 

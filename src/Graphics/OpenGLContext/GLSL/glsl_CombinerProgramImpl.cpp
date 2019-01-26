@@ -99,22 +99,22 @@ bool CombinerProgramImpl::getBinaryForm(std::vector<char> & _buffer)
 	_buffer.resize(totalSize);
 
 	char* keyData = reinterpret_cast<char*>(&key);
-	std::copy_n(keyData, sizeof(key), _buffer.data());
+	std::copy_n(keyData, sizeof(key), _buffer.begin());
 	int offset = sizeof(key);
 
 	char* inputData = reinterpret_cast<char*>(&inputs);
-	std::copy_n(inputData, sizeof(inputs), _buffer.data() + offset);
+	std::copy_n(inputData, sizeof(inputs), _buffer.begin() + offset);
 	offset += sizeof(inputs);
 
 	char* binaryFormatData = reinterpret_cast<char*>(&binaryFormat);
-	std::copy_n(binaryFormatData, sizeof(binaryFormat), _buffer.data() + offset);
+	std::copy_n(binaryFormatData, sizeof(binaryFormat), _buffer.begin() + offset);
 	offset += sizeof(binaryFormat);
 
 	char* binaryLengthData = reinterpret_cast<char*>(&binaryLength);
-	std::copy_n(binaryLengthData, sizeof(binaryLength), _buffer.data() + offset);
+	std::copy_n(binaryLengthData, sizeof(binaryLength), _buffer.begin() + offset);
 	offset += sizeof(binaryLength);
 
-	std::copy_n(binary.data(), binaryLength, _buffer.data() + offset);
+	std::copy_n(binary.begin(), binaryLength, _buffer.begin() + offset);
 
 	return true;
 }

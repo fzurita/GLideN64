@@ -506,9 +506,9 @@ namespace glsl {
 
 		void activate() override {
 			ShadowMapShaderBase::activate();
-
+			std::unique_ptr<GLfloat[]> values(new GLfloat[4]);
 			std::copy_n(&gDP.fogColor.r, 4, values.get());
-			FunctionWrapper::glUniform4fv(m_loc, 1, std::move(values));
+			FunctionWrapper::glUniform4fv(m_locFog, 1, std::move(values));
 			FunctionWrapper::glUniform1i(m_locZlut, int(graphics::textureIndices::ZLUTTex));
 			FunctionWrapper::glUniform1i(m_locTlut, int(graphics::textureIndices::PaletteTex));
 			FunctionWrapper::glUniform1i(m_locDepthImage, 0);
@@ -538,7 +538,7 @@ namespace glsl {
 			: FXAAShaderBase(_glinfo, _useProgram, _vertexHeader, _fragmentHeader, _fragmentEnd)
 		{
 			m_useProgram->useProgram(m_program);
-			m_textureSizeLoc = glGetUniformLocation(GLuint(m_program), "uTextureSize");
+			m_textureSizeLoc = FunctionWrapper::glGetUniformLocation(GLuint(m_program), "uTextureSize");
 			m_useProgram->useProgram(graphics::ObjectHandle::null);
 		}
 
@@ -549,7 +549,7 @@ namespace glsl {
 				(m_width != pBuffer->m_pTexture->realWidth || m_height != pBuffer->m_pTexture->realHeight)) {
 				m_width = pBuffer->m_pTexture->realWidth;
 				m_height = pBuffer->m_pTexture->realHeight;
-				glUniform2f(m_textureSizeLoc, GLfloat(m_width), GLfloat(m_height));
+				FunctionWrapper::glUniform2f(m_textureSizeLoc, GLfloat(m_width), GLfloat(m_height));
 			}
 		}
 
@@ -617,7 +617,7 @@ namespace glsl {
 				const GLfloat depth = gDP.otherMode.depthSource == G_ZS_PRIM ? gDP.primDepth.z : 0.0f;
 				if (depth != m_depth) {
 					m_depth = depth;
-					glUniform1f(m_primDepthLoc, m_depth);
+					FunctionWrapper::glUniform1f(m_primDepthLoc, m_depth);
 				}
 			}
 			gDP.changed |= CHANGED_COMBINE;

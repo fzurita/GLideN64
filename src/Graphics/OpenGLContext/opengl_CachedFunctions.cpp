@@ -60,7 +60,6 @@ void CachedBindRenderbuffer::bind(graphics::Parameter _target, graphics::ObjectH
 void CachedBindBuffer::bind(graphics::Parameter _target, graphics::ObjectHandle _name) {
 	if (update(_target, _name))
 		FunctionWrapper::glBindBuffer(GLenum(_target), GLuint(_name));
->>>>>>> Refactor code to use new OpenGL wrapper
 }
 
 /*---------------CachedBindTexture-------------*/

@@ -97,25 +97,12 @@ void UnbufferedDrawerThreadSafe::drawTriangles(const graphics::Context::DrawTria
 		return;
 	}
 
-	if (config.frameBufferEmulation.N64DepthCompare == 0) {
-		std::unique_ptr<char[]> elementsCopy(new char[_params.elementsCount]);
-		std::copy_n(reinterpret_cast<char*>(_params.elements), _params.elementsCount, elementsCopy.get());
+	std::unique_ptr<u16[]> elementsCopy(new u16[_params.elementsCount]);
+	std::copy_n(reinterpret_cast<u16*>(_params.elements), _params.elementsCount, elementsCopy.get());
 
-		FunctionWrapper::glDrawElementsUnbuffered(GLenum(_params.mode), _params.elementsCount, GL_UNSIGNED_BYTE,
-			std::move(elementsCopy), std::move(verticesCopy));
-		return;
-	}
+	FunctionWrapper::glDrawElementsUnbuffered(GLenum(_params.mode), _params.elementsCount, GL_UNSIGNED_SHORT,
+		std::move(elementsCopy), std::move(verticesCopy));
 
-	// Draw polygons one by one
-	for (GLuint i = 0; i < _params.elementsCount; i += 3) {
-		FunctionWrapper::glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
-		std::unique_ptr<char[]> elementsCopy(new char[3]);
-		std::copy_n(reinterpret_cast<char*>(_params.elements) + i, 3, elementsCopy.get());
-
-		FunctionWrapper::glDrawElementsUnbuffered(GLenum(_params.mode), 3, GL_UNSIGNED_BYTE, std::move(elementsCopy),
-			std::move(verticesCopy));
-	}
 }
 
 void UnbufferedDrawerThreadSafe::drawRects(const graphics::Context::DrawRectParameters & _params)
