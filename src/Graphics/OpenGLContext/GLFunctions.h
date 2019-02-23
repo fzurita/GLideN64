@@ -4,7 +4,6 @@
 #ifdef OS_WINDOWS
 #include <windows.h>
 #elif defined(OS_LINUX)
-//#define GL_GLEXT_PROTOTYPES
 #include <winlnxdefs.h>
 #endif
 
@@ -16,7 +15,7 @@
 #include <OpenGL/OpenGL.h>
 #include <stddef.h>
 #include <OpenGL/gl3.h>
-//#include <OpenGL/gl3ext.h>
+
 #elif defined(OS_IOS)
 #include <OpenGLES/ES3/gl.h>
 #include <OpenGLES/ES3/glext.h>
@@ -37,53 +36,9 @@ typedef double GLdouble;
 #include <sstream>
 #include "Log.h"
 
-#ifdef GL_ERROR_DEBUG
-#define CHECKED_GL_FUNCTION(proc_name, ...) checked([&]() { proc_name(__VA_ARGS__);}, #proc_name)
-#define CHECKED_GL_FUNCTION_WITH_RETURN(proc_name, ReturnType, ...) checkedWithReturn<ReturnType>([&]() { return proc_name(__VA_ARGS__);}, #proc_name)
-#else
-#define CHECKED_GL_FUNCTION(proc_name, ...) proc_name(__VA_ARGS__)
-#define CHECKED_GL_FUNCTION_WITH_RETURN(proc_name, ReturnType, ...) proc_name(__VA_ARGS__)
-#endif
-
 #define IS_GL_FUNCTION_VALID(proc_name) g_##proc_name != nullptr
-#define GET_GL_FUNCTION(proc_name) g_##proc_name
 
 #if defined(EGL) || defined(OS_IOS)
-
-#define glGetError g_glGetError
-#define glBlendFunc(...) CHECKED_GL_FUNCTION(g_glBlendFunc, __VA_ARGS__)
-#define glPixelStorei(...) CHECKED_GL_FUNCTION(g_glPixelStorei, __VA_ARGS__)
-#define glClearColor(...) CHECKED_GL_FUNCTION(g_glClearColor, __VA_ARGS__)
-#define glCullFace(...) CHECKED_GL_FUNCTION(g_glCullFace, __VA_ARGS__)
-#define glDepthFunc(...) CHECKED_GL_FUNCTION(g_glDepthFunc, __VA_ARGS__)
-#define glDepthMask(...) CHECKED_GL_FUNCTION(g_glDepthMask, __VA_ARGS__)
-#define glDisable(...) CHECKED_GL_FUNCTION(g_glDisable, __VA_ARGS__)
-#define glEnable(...) CHECKED_GL_FUNCTION(g_glEnable, __VA_ARGS__)
-#define glPolygonOffset(...) CHECKED_GL_FUNCTION(g_glPolygonOffset, __VA_ARGS__)
-#define glScissor(...) CHECKED_GL_FUNCTION(g_glScissor, __VA_ARGS__)
-#define glViewport(...) CHECKED_GL_FUNCTION(g_glViewport, __VA_ARGS__)
-#define glBindTexture(...) CHECKED_GL_FUNCTION(g_glBindTexture, __VA_ARGS__)
-#define glTexImage2D(...) CHECKED_GL_FUNCTION(g_glTexImage2D, __VA_ARGS__)
-#define glTexParameteri(...) CHECKED_GL_FUNCTION(g_glTexParameteri, __VA_ARGS__)
-#define glGetIntegerv(...) CHECKED_GL_FUNCTION(g_glGetIntegerv, __VA_ARGS__)
-#define glGetString(...) CHECKED_GL_FUNCTION_WITH_RETURN(g_glGetString, const GLubyte*, __VA_ARGS__)
-#define glReadPixels(...) CHECKED_GL_FUNCTION(g_glReadPixels, __VA_ARGS__)
-#define glTexSubImage2D(...) CHECKED_GL_FUNCTION(g_glTexSubImage2D, __VA_ARGS__)
-#define glDrawArrays(...) CHECKED_GL_FUNCTION(g_glDrawArrays, __VA_ARGS__)
-#define glDrawElements(...) CHECKED_GL_FUNCTION(g_glDrawElements, __VA_ARGS__)
-#define glLineWidth(...) CHECKED_GL_FUNCTION(g_glLineWidth, __VA_ARGS__)
-#define glClear(...) CHECKED_GL_FUNCTION(g_glClear, __VA_ARGS__)
-#define glGetFloatv(...) CHECKED_GL_FUNCTION(g_glGetFloatv, __VA_ARGS__)
-#define glDeleteTextures(...) CHECKED_GL_FUNCTION(g_glDeleteTextures, __VA_ARGS__)
-#define glGenTextures(...) CHECKED_GL_FUNCTION(g_glGenTextures, __VA_ARGS__)
-#define glTexParameterf(...) CHECKED_GL_FUNCTION(g_glTexParameterf, __VA_ARGS__)
-#define glActiveTexture(...) CHECKED_GL_FUNCTION(g_glActiveTexture, __VA_ARGS__)
-#define glBlendColor(...) CHECKED_GL_FUNCTION(g_glBlendColor, __VA_ARGS__)
-#define glReadBuffer(...) CHECKED_GL_FUNCTION(g_glReadBuffer, __VA_ARGS__)
-#define glFinish(...) CHECKED_GL_FUNCTION(g_glFinish, __VA_ARGS__)
-#if defined(OS_ANDROID)
-#define eglGetNativeClientBufferANDROID(...) CHECKED_GL_FUNCTION_WITH_RETURN(g_eglGetNativeClientBufferANDROID, EGLClientBuffer, __VA_ARGS__)
-#endif
 
 extern PFNGLBLENDFUNCPROC g_glBlendFunc;
 extern PFNGLPIXELSTOREIPROC g_glPixelStorei;
@@ -117,117 +72,50 @@ extern PFNGLBLENDCOLORPROC g_glBlendColor;
 extern PFNGLREADBUFFERPROC g_glReadBuffer;
 extern PFNGLFINISHPROC g_glFinish;
 #if defined(OS_ANDROID)
-extern PFNEGLGETNATIVECLIENTBUFFERANDROIDPROC g_eglGetNativeClientBufferANDROID;
+extern PFNEGLGETNATIVECLIENTBUFFERANDROIDPROC g_glGetNativeClientBufferANDROID;
 #endif
+#endif
+
+#if !defined(EGL) && !defined(OS_IOS)
+#define g_glBlendFunc(...) ::glBlendFunc(__VA_ARGS__)
+#define g_glPixelStorei(...) ::glPixelStorei(__VA_ARGS__)
+#define g_glClearColor(...) ::glClearColor(__VA_ARGS__)
+#define g_glCullFace(...) ::glCullFace(__VA_ARGS__)
+#define g_glDepthFunc(...) ::glDepthFunc(__VA_ARGS__)
+#define g_glDepthMask(...) ::glDepthMask(__VA_ARGS__)
+#define g_glDisable(...) ::glDisable(__VA_ARGS__)
+#define g_glEnable(...) ::glEnable(__VA_ARGS__)
+#define g_glPolygonOffset(...) ::glPolygonOffset(__VA_ARGS__)
+#define g_glScissor(...) ::glScissor(__VA_ARGS__)
+#define g_glViewport(...) ::glViewport(__VA_ARGS__)
+#define g_glBindTexture(...) ::glBindTexture(__VA_ARGS__)
+#define g_glTexImage2D(...) ::glTexImage2D(__VA_ARGS__)
+#define g_glTexParameteri(...) ::glTexParameteri(__VA_ARGS__)
+#define g_glGetIntegerv(...) ::glGetIntegerv(__VA_ARGS__)
+#define g_glGetString(...) ::glGetString(__VA_ARGS__)
+#define g_glReadPixels(...) ::glReadPixels(__VA_ARGS__)
+#define g_glTexSubImage2D(...) ::glTexSubImage2D(__VA_ARGS__)
+#define g_glDrawArrays(...) ::glDrawArrays(__VA_ARGS__)
+#define g_glGetError(...) ::glGetError(__VA_ARGS__)
+#define g_glDrawElements(...) ::glDrawElements(__VA_ARGS__)
+#define g_glLineWidth(...) ::glLineWidth(__VA_ARGS__)
+#define g_glClear(...) ::glClear(__VA_ARGS__)
+#define g_glGetFloatv(...) ::glGetFloatv(__VA_ARGS__)
+#define g_glDeleteTextures(...) ::glDeleteTextures(__VA_ARGS__)
+#define g_glGenTextures(...) ::glGenTextures(__VA_ARGS__)
+#define g_glTexParameterf(...) ::glTexParameterf(__VA_ARGS__)
+#ifndef OS_WINDOWS
+#define g_glActiveTexture(...) ::glActiveTexture(__VA_ARGS__)
+#define g_glBlendColor(...) ::glBlendColor(__VA_ARGS__)
+#endif
+#define g_glReadBuffer(...) ::glReadBuffer(__VA_ARGS__)
+#define g_glFinish(...) ::glFinish(__VA_ARGS__)
 #endif
 
 #ifdef OS_WINDOWS
-#define glActiveTexture g_glActiveTexture
-#define glBlendColor g_glBlendColor
-
 extern PFNGLACTIVETEXTUREPROC g_glActiveTexture;
 extern PFNGLBLENDCOLORPROC g_glBlendColor;
 #endif
-
-#define glCreateShader(...) CHECKED_GL_FUNCTION_WITH_RETURN(g_glCreateShader, GLuint, __VA_ARGS__)
-#define glCompileShader(...) CHECKED_GL_FUNCTION(g_glCompileShader, __VA_ARGS__)
-#define glShaderSource(...) CHECKED_GL_FUNCTION(g_glShaderSource, __VA_ARGS__)
-#define glCreateProgram(...) CHECKED_GL_FUNCTION_WITH_RETURN(g_glCreateProgram, GLuint, __VA_ARGS__)
-#define glAttachShader(...) CHECKED_GL_FUNCTION(g_glAttachShader, __VA_ARGS__)
-#define glLinkProgram(...) CHECKED_GL_FUNCTION(g_glLinkProgram, __VA_ARGS__)
-#define glUseProgram(...) CHECKED_GL_FUNCTION(g_glUseProgram, __VA_ARGS__)
-#define glGetUniformLocation(...) CHECKED_GL_FUNCTION_WITH_RETURN(g_glGetUniformLocation, GLint, __VA_ARGS__)
-#define glUniform1i(...) CHECKED_GL_FUNCTION(g_glUniform1i, __VA_ARGS__)
-#define glUniform1f(...) CHECKED_GL_FUNCTION(g_glUniform1f, __VA_ARGS__)
-#define glUniform2f(...) CHECKED_GL_FUNCTION(g_glUniform2f, __VA_ARGS__)
-#define glUniform2i(...) CHECKED_GL_FUNCTION(g_glUniform2i, __VA_ARGS__)
-#define glUniform4i(...) CHECKED_GL_FUNCTION(g_glUniform4i, __VA_ARGS__)
-
-#define glUniform4f(...) CHECKED_GL_FUNCTION(g_glUniform4f, __VA_ARGS__)
-#define glUniform3fv(...) CHECKED_GL_FUNCTION(g_glUniform3fv, __VA_ARGS__)
-#define glUniform4fv(...) CHECKED_GL_FUNCTION(g_glUniform4fv, __VA_ARGS__)
-#define glDetachShader(...) CHECKED_GL_FUNCTION(g_glDetachShader, __VA_ARGS__)
-#define glDeleteShader(...) CHECKED_GL_FUNCTION(g_glDeleteShader, __VA_ARGS__)
-#define glDeleteProgram(...) CHECKED_GL_FUNCTION(g_glDeleteProgram, __VA_ARGS__)
-#define glGetProgramInfoLog(...) CHECKED_GL_FUNCTION(g_glGetProgramInfoLog, __VA_ARGS__)
-#define glGetShaderInfoLog(...) CHECKED_GL_FUNCTION(g_glGetShaderInfoLog, __VA_ARGS__)
-#define glGetShaderiv(...) CHECKED_GL_FUNCTION(g_glGetShaderiv, __VA_ARGS__)
-#define glGetProgramiv(...) CHECKED_GL_FUNCTION(g_glGetProgramiv, __VA_ARGS__)
-
-#define glEnableVertexAttribArray(...) CHECKED_GL_FUNCTION(g_glEnableVertexAttribArray, __VA_ARGS__)
-#define glDisableVertexAttribArray(...) CHECKED_GL_FUNCTION(g_glDisableVertexAttribArray, __VA_ARGS__)
-#define glVertexAttribPointer(...) CHECKED_GL_FUNCTION(g_glVertexAttribPointer, __VA_ARGS__)
-#define glBindAttribLocation(...) CHECKED_GL_FUNCTION(g_glBindAttribLocation, __VA_ARGS__)
-#define glVertexAttrib1f(...) CHECKED_GL_FUNCTION(g_glVertexAttrib1f, __VA_ARGS__)
-#define glVertexAttrib4f(...) CHECKED_GL_FUNCTION(g_glVertexAttrib4f, __VA_ARGS__)
-#define glVertexAttrib4fv(...) CHECKED_GL_FUNCTION(g_glVertexAttrib4fv, __VA_ARGS__)
-
-#define glDepthRangef(...) CHECKED_GL_FUNCTION(g_glDepthRangef, __VA_ARGS__)
-#define glClearDepthf(...) CHECKED_GL_FUNCTION(g_glClearDepthf, __VA_ARGS__)
-
-#define glBindBuffer(...) CHECKED_GL_FUNCTION(g_glBindBuffer, __VA_ARGS__)
-#define glBindFramebuffer(...) CHECKED_GL_FUNCTION(g_glBindFramebuffer, __VA_ARGS__)
-#define glBindRenderbuffer(...) CHECKED_GL_FUNCTION(g_glBindRenderbuffer, __VA_ARGS__)
-#define glDrawBuffers(...) CHECKED_GL_FUNCTION(g_glDrawBuffers, __VA_ARGS__)
-#define glGenFramebuffers(...) CHECKED_GL_FUNCTION(g_glGenFramebuffers, __VA_ARGS__)
-#define glDeleteFramebuffers(...) CHECKED_GL_FUNCTION(g_glDeleteFramebuffers, __VA_ARGS__)
-#define glFramebufferTexture2D(...) CHECKED_GL_FUNCTION(g_glFramebufferTexture2D, __VA_ARGS__)
-#define glTexImage2DMultisample(...) CHECKED_GL_FUNCTION(g_glTexImage2DMultisample, __VA_ARGS__)
-#define glTexStorage2DMultisample(...) CHECKED_GL_FUNCTION(g_glTexStorage2DMultisample, __VA_ARGS__)
-#define glGenRenderbuffers(...) CHECKED_GL_FUNCTION(g_glGenRenderbuffers, __VA_ARGS__)
-#define glRenderbufferStorage(...) CHECKED_GL_FUNCTION(g_glRenderbufferStorage, __VA_ARGS__)
-#define glDeleteRenderbuffers(...) CHECKED_GL_FUNCTION(g_glDeleteRenderbuffers, __VA_ARGS__)
-#define glFramebufferRenderbuffer(...) CHECKED_GL_FUNCTION(g_glFramebufferRenderbuffer, __VA_ARGS__)
-#define glCheckFramebufferStatus(...) CHECKED_GL_FUNCTION_WITH_RETURN(g_glCheckFramebufferStatus, GLenum, __VA_ARGS__)
-#define glBlitFramebuffer(...) CHECKED_GL_FUNCTION(g_glBlitFramebuffer, __VA_ARGS__)
-#define glGenVertexArrays(...) CHECKED_GL_FUNCTION(g_glGenVertexArrays, __VA_ARGS__)
-#define glBindVertexArray(...) CHECKED_GL_FUNCTION(g_glBindVertexArray, __VA_ARGS__)
-#define glDeleteVertexArrays(...) CHECKED_GL_FUNCTION(g_glDeleteVertexArrays, __VA_ARGS__);
-#define glGenBuffers(...) CHECKED_GL_FUNCTION(g_glGenBuffers, __VA_ARGS__)
-#define glBufferData(...) CHECKED_GL_FUNCTION(g_glBufferData, __VA_ARGS__)
-#define glMapBuffer(...) CHECKED_GL_FUNCTION(g_glMapBuffer, __VA_ARGS__)
-#define glMapBufferRange(...) CHECKED_GL_FUNCTION_WITH_RETURN(g_glMapBufferRange, void*, __VA_ARGS__)
-#define glUnmapBuffer(...) CHECKED_GL_FUNCTION(g_glUnmapBuffer, __VA_ARGS__)
-#define glDeleteBuffers(...) CHECKED_GL_FUNCTION(g_glDeleteBuffers, __VA_ARGS__)
-#define glBindImageTexture(...) CHECKED_GL_FUNCTION(g_glBindImageTexture, __VA_ARGS__)
-#define glMemoryBarrier(...) CHECKED_GL_FUNCTION(g_glMemoryBarrier, __VA_ARGS__)
-#define glGetStringi(...) CHECKED_GL_FUNCTION_WITH_RETURN(g_glGetStringi, const GLubyte*, __VA_ARGS__)
-#define glInvalidateFramebuffer(...) CHECKED_GL_FUNCTION(g_glInvalidateFramebuffer, __VA_ARGS__)
-#define glBufferStorage(...) CHECKED_GL_FUNCTION(g_glBufferStorage, __VA_ARGS__)
-#define glFenceSync(...) CHECKED_GL_FUNCTION_WITH_RETURN(g_glFenceSync, GLsync, __VA_ARGS__)
-#define glClientWaitSync(...) CHECKED_GL_FUNCTION(g_glClientWaitSync, __VA_ARGS__)
-#define glDeleteSync(...) CHECKED_GL_FUNCTION(g_glDeleteSync, __VA_ARGS__)
-
-#define glGetUniformBlockIndex(...) CHECKED_GL_FUNCTION(g_glGetUniformBlockIndex, __VA_ARGS__)
-#define glUniformBlockBinding(...) CHECKED_GL_FUNCTION(g_glUniformBlockBinding, __VA_ARGS__)
-#define glGetActiveUniformBlockiv(...) CHECKED_GL_FUNCTION(g_glGetActiveUniformBlockiv, __VA_ARGS__)
-#define glGetUniformIndices(...) CHECKED_GL_FUNCTION(g_glGetUniformIndices, __VA_ARGS__)
-#define glGetActiveUniformsiv(...) CHECKED_GL_FUNCTION(g_glGetActiveUniformsiv, __VA_ARGS__)
-#define glBindBufferBase(...) CHECKED_GL_FUNCTION(g_glBindBufferBase, __VA_ARGS__)
-#define glBufferSubData(...) CHECKED_GL_FUNCTION(g_glBufferSubData, __VA_ARGS__)
-
-#define glGetProgramBinary(...) CHECKED_GL_FUNCTION(g_glGetProgramBinary, __VA_ARGS__)
-#define glProgramBinary(...) CHECKED_GL_FUNCTION(g_glProgramBinary, __VA_ARGS__)
-#define glProgramParameteri(...) CHECKED_GL_FUNCTION(g_glProgramParameteri, __VA_ARGS__)
-
-#define glTexStorage2D(...) CHECKED_GL_FUNCTION(g_glTexStorage2D, __VA_ARGS__)
-#define glTextureStorage2D(...) CHECKED_GL_FUNCTION(g_glTextureStorage2D, __VA_ARGS__)
-#define glTextureSubImage2D(...) CHECKED_GL_FUNCTION(g_glTextureSubImage2D, __VA_ARGS__)
-#define glTextureStorage2DMultisample(...) CHECKED_GL_FUNCTION(g_glTextureStorage2DMultisample, __VA_ARGS__)
-#define glTextureParameteri(...) CHECKED_GL_FUNCTION(g_glTextureParameteri, __VA_ARGS__)
-#define glTextureParameterf(...) CHECKED_GL_FUNCTION(g_glTextureParameterf, __VA_ARGS__)
-#define glCreateTextures(...) CHECKED_GL_FUNCTION(g_glCreateTextures, __VA_ARGS__)
-#define glCreateBuffers(...) CHECKED_GL_FUNCTION(g_glCreateBuffers, __VA_ARGS__)
-#define glCreateFramebuffers(...) CHECKED_GL_FUNCTION(g_glCreateFramebuffers, __VA_ARGS__)
-#define glNamedFramebufferTexture(...) CHECKED_GL_FUNCTION(g_glNamedFramebufferTexture, __VA_ARGS__)
-#define glDrawRangeElementsBaseVertex(...) CHECKED_GL_FUNCTION(g_glDrawRangeElementsBaseVertex, __VA_ARGS__)
-#define glFlushMappedBufferRange(...) CHECKED_GL_FUNCTION(g_glFlushMappedBufferRange, __VA_ARGS__)
-#define glTextureBarrier(...) CHECKED_GL_FUNCTION(g_glTextureBarrier, __VA_ARGS__)
-#define glTextureBarrierNV(...) CHECKED_GL_FUNCTION(g_glTextureBarrierNV, __VA_ARGS__)
-#define glClearBufferfv(...) CHECKED_GL_FUNCTION(g_glClearBufferfv, __VA_ARGS__)
-#define glEnablei(...) CHECKED_GL_FUNCTION(g_glEnablei, __VA_ARGS__)
-#define glDisablei(...) CHECKED_GL_FUNCTION(g_glDisablei, __VA_ARGS__)
-#define glEGLImageTargetTexture2DOES(...) CHECKED_GL_FUNCTION(g_glEGLImageTargetTexture2DOES, __VA_ARGS__)
 
 extern PFNGLCREATESHADERPROC g_glCreateShader;
 extern PFNGLCOMPILESHADERPROC g_glCompileShader;
@@ -333,30 +221,142 @@ extern PFNGLEGLIMAGETARGETTEXTURE2DOESPROC g_glEGLImageTargetTexture2DOES;
 
 void initGLFunctions();
 
-template<typename F> void checked(F fn, const char* _functionName)
-{
-	fn();
-	auto error = glGetError();
-	if (error != GL_NO_ERROR) {
-		std::stringstream errorString;
-		errorString << _functionName << " OpenGL error: 0x" << std::hex << error;
-		LOG(LOG_ERROR, errorString.str().c_str());
-		throw std::runtime_error(errorString.str().c_str());
-	}
-}
+#include "Graphics/OpenGLContext/ThreadedOpenGl/opengl_WrappedFunctions.h"
 
-template<typename R, typename F> R checkedWithReturn(F fn, const char* _functionName)
-{
-	R returnValue = fn();
-	auto error = glGetError();
-	if (error != GL_NO_ERROR) {
-		std::stringstream errorString;
-		errorString << _functionName << " OpenGL error: 0x" << std::hex << error;
-		LOG(LOG_ERROR, errorString.str().c_str());
-		throw std::runtime_error(errorString.str().c_str());
-	}
+#define glGetError(...) opengl::FunctionWrapper::wrGetError(__VA_ARGS__)
+#define glBlendFunc(...) opengl::FunctionWrapper::wrBlendFunc(__VA_ARGS__)
+#define glPixelStorei(...) opengl::FunctionWrapper::wrPixelStorei(__VA_ARGS__)
+#define glClearColor(...) opengl::FunctionWrapper::wrClearColor(__VA_ARGS__)
+#define glCullFace(...) opengl::FunctionWrapper::wrCullFace(__VA_ARGS__)
+#define glDepthFunc(...) opengl::FunctionWrapper::wrDepthFunc(__VA_ARGS__)
+#define glDepthMask(...) opengl::FunctionWrapper::wrDepthMask(__VA_ARGS__)
+#define glDisable(...) opengl::FunctionWrapper::wrDisable(__VA_ARGS__)
+#define glEnable(...) opengl::FunctionWrapper::wrEnable(__VA_ARGS__)
+#define glPolygonOffset(...) opengl::FunctionWrapper::wrPolygonOffset(__VA_ARGS__)
+#define glScissor(...) opengl::FunctionWrapper::wrScissor(__VA_ARGS__)
+#define glViewport(...) opengl::FunctionWrapper::wrViewport(__VA_ARGS__)
+#define glBindTexture(...) opengl::FunctionWrapper::wrBindTexture(__VA_ARGS__)
+#define glTexImage2D(...) opengl::FunctionWrapper::wrTexImage2D(__VA_ARGS__)
+#define glTexParameteri(...) opengl::FunctionWrapper::wrTexParameteri(__VA_ARGS__)
+#define glGetIntegerv(...) opengl::FunctionWrapper::wrGetIntegerv(__VA_ARGS__)
+#define glGetString(...) opengl::FunctionWrapper::wrGetString(__VA_ARGS__)
+#define glReadPixels(...) opengl::FunctionWrapper::wrReadPixels(__VA_ARGS__)
+#define glTexSubImage2D(...) opengl::FunctionWrapper::wrTexSubImage2D(__VA_ARGS__)
+#define glDrawArrays(...) opengl::FunctionWrapper::wrDrawArrays(__VA_ARGS__)
+#define glDrawElements(...) opengl::FunctionWrapper::wrDrawElements(__VA_ARGS__)
+#define glLineWidth(...) opengl::FunctionWrapper::wrLineWidth(__VA_ARGS__)
+#define glClear(...) opengl::FunctionWrapper::wrClear(__VA_ARGS__)
+#define glGetFloatv(...) opengl::FunctionWrapper::wrGetFloatv(__VA_ARGS__)
+#define glDeleteTextures(...) opengl::FunctionWrapper::wrDeleteTextures(__VA_ARGS__)
+#define glGenTextures(...) opengl::FunctionWrapper::wrGenTextures(__VA_ARGS__)
+#define glTexParameterf(...) opengl::FunctionWrapper::wrTexParameterf(__VA_ARGS__)
+#define glActiveTexture(...) opengl::FunctionWrapper::wrActiveTexture(__VA_ARGS__)
+#define glBlendColor(...) opengl::FunctionWrapper::wrBlendColor(__VA_ARGS__)
+#define glReadBuffer(...) opengl::FunctionWrapper::wrReadBuffer(__VA_ARGS__)
+#define glFinish(...) opengl::FunctionWrapper::wrFinish(__VA_ARGS__)
+#if defined(OS_ANDROID)
+#define eglGetNativeClientBufferANDROID(...) opengl::FunctionWrapper::ewrGetNativeClientBufferANDROID(__VA_ARGS__)
+#endif
+#define glCreateShader(...) opengl::FunctionWrapper::wrCreateShader(__VA_ARGS__)
+#define glCompileShader(...) opengl::FunctionWrapper::wrCompileShader(__VA_ARGS__)
+#define glShaderSource(...) opengl::FunctionWrapper::wrShaderSource(__VA_ARGS__)
+#define glCreateProgram(...) opengl::FunctionWrapper::wrCreateProgram(__VA_ARGS__)
+#define glAttachShader(...) opengl::FunctionWrapper::wrAttachShader(__VA_ARGS__)
+#define glLinkProgram(...) opengl::FunctionWrapper::wrLinkProgram(__VA_ARGS__)
+#define glUseProgram(...) opengl::FunctionWrapper::wrUseProgram(__VA_ARGS__)
+#define glGetUniformLocation(...) opengl::FunctionWrapper::wrGetUniformLocation(__VA_ARGS__)
+#define glUniform1i(...) opengl::FunctionWrapper::wrUniform1i(__VA_ARGS__)
+#define glUniform1f(...) opengl::FunctionWrapper::wrUniform1f(__VA_ARGS__)
+#define glUniform2f(...) opengl::FunctionWrapper::wrUniform2f(__VA_ARGS__)
+#define glUniform2i(...) opengl::FunctionWrapper::wrUniform2i(__VA_ARGS__)
+#define glUniform4i(...) opengl::FunctionWrapper::wrUniform4i(__VA_ARGS__)
 
-	return returnValue;
-}
+#define glUniform4f(...) opengl::FunctionWrapper::wrUniform4f(__VA_ARGS__)
+#define glUniform3fv(...) opengl::FunctionWrapper::wrUniform3fv(__VA_ARGS__)
+#define glUniform4fv(...) opengl::FunctionWrapper::wrUniform4fv(__VA_ARGS__)
+#define glDetachShader(...) opengl::FunctionWrapper::wrDetachShader(__VA_ARGS__)
+#define glDeleteShader(...) opengl::FunctionWrapper::wrDeleteShader(__VA_ARGS__)
+#define glDeleteProgram(...) opengl::FunctionWrapper::wrDeleteProgram(__VA_ARGS__)
+#define glGetProgramInfoLog(...) opengl::FunctionWrapper::wrGetProgramInfoLog(__VA_ARGS__)
+#define glGetShaderInfoLog(...) opengl::FunctionWrapper::wrGetShaderInfoLog(__VA_ARGS__)
+#define glGetShaderiv(...) opengl::FunctionWrapper::wrGetShaderiv(__VA_ARGS__)
+#define glGetProgramiv(...) opengl::FunctionWrapper::wrGetProgramiv(__VA_ARGS__)
+
+#define glEnableVertexAttribArray(...) opengl::FunctionWrapper::wrEnableVertexAttribArray(__VA_ARGS__)
+#define glDisableVertexAttribArray(...) opengl::FunctionWrapper::wrDisableVertexAttribArray(__VA_ARGS__)
+#define glVertexAttribPointer(...) opengl::FunctionWrapper::wrVertexAttribPointer(__VA_ARGS__)
+#define glBindAttribLocation(...) opengl::FunctionWrapper::wrBindAttribLocation(__VA_ARGS__)
+#define glVertexAttrib1f(...) opengl::FunctionWrapper::wrVertexAttrib1f(__VA_ARGS__)
+#define glVertexAttrib4f(...) opengl::FunctionWrapper::wrVertexAttrib4f(__VA_ARGS__)
+#define glVertexAttrib4fv(...) opengl::FunctionWrapper::wrVertexAttrib4fv(__VA_ARGS__)
+
+#define glDepthRangef(...) opengl::FunctionWrapper::wrDepthRangef(__VA_ARGS__)
+#define glClearDepthf(...) opengl::FunctionWrapper::wrClearDepthf(__VA_ARGS__)
+
+#define glBindBuffer(...) opengl::FunctionWrapper::wrBindBuffer(__VA_ARGS__)
+#define glBindFramebuffer(...) opengl::FunctionWrapper::wrBindFramebuffer(__VA_ARGS__)
+#define glBindRenderbuffer(...) opengl::FunctionWrapper::wrBindRenderbuffer(__VA_ARGS__)
+#define glDrawBuffers(...) opengl::FunctionWrapper::wrDrawBuffers(__VA_ARGS__)
+#define glGenFramebuffers(...) opengl::FunctionWrapper::wrGenFramebuffers(__VA_ARGS__)
+#define glDeleteFramebuffers(...) opengl::FunctionWrapper::wrDeleteFramebuffers(__VA_ARGS__)
+#define glFramebufferTexture2D(...) opengl::FunctionWrapper::wrFramebufferTexture2D(__VA_ARGS__)
+#define glTexImage2DMultisample(...) opengl::FunctionWrapper::wrTexImage2DMultisample(__VA_ARGS__)
+#define glTexStorage2DMultisample(...) opengl::FunctionWrapper::wrTexStorage2DMultisample(__VA_ARGS__)
+#define glGenRenderbuffers(...) opengl::FunctionWrapper::wrGenRenderbuffers(__VA_ARGS__)
+#define glRenderbufferStorage(...) opengl::FunctionWrapper::wrRenderbufferStorage(__VA_ARGS__)
+#define glDeleteRenderbuffers(...) opengl::FunctionWrapper::wrDeleteRenderbuffers(__VA_ARGS__)
+#define glFramebufferRenderbuffer(...) opengl::FunctionWrapper::wrFramebufferRenderbuffer(__VA_ARGS__)
+#define glCheckFramebufferStatus(...) opengl::FunctionWrapper::wrCheckFramebufferStatus(__VA_ARGS__)
+#define glBlitFramebuffer(...) opengl::FunctionWrapper::wrBlitFramebuffer(__VA_ARGS__)
+#define glGenVertexArrays(...) opengl::FunctionWrapper::wrGenVertexArrays(__VA_ARGS__)
+#define glBindVertexArray(...) opengl::FunctionWrapper::wrBindVertexArray(__VA_ARGS__)
+#define glDeleteVertexArrays(...) opengl::FunctionWrapper::wrDeleteVertexArrays(__VA_ARGS__);
+#define glGenBuffers(...) opengl::FunctionWrapper::wrGenBuffers(__VA_ARGS__)
+#define glBufferData(...) opengl::FunctionWrapper::wrBufferData(__VA_ARGS__)
+#define glMapBuffer(...) opengl::FunctionWrapper::wrMapBuffer(__VA_ARGS__)
+#define glMapBufferRange(...) opengl::FunctionWrapper::wrMapBufferRange(__VA_ARGS__)
+#define glUnmapBuffer(...) opengl::FunctionWrapper::wrUnmapBuffer(__VA_ARGS__)
+#define glDeleteBuffers(...) opengl::FunctionWrapper::wrDeleteBuffers(__VA_ARGS__)
+#define glBindImageTexture(...) opengl::FunctionWrapper::wrBindImageTexture(__VA_ARGS__)
+#define glMemoryBarrier(...) opengl::FunctionWrapper::wrMemoryBarrier(__VA_ARGS__)
+#define glGetStringi(...) opengl::FunctionWrapper::wrGetStringi(__VA_ARGS__)
+#define glInvalidateFramebuffer(...) opengl::FunctionWrapper::wrInvalidateFramebuffer(__VA_ARGS__)
+#define glBufferStorage(...) opengl::FunctionWrapper::wrBufferStorage(__VA_ARGS__)
+#define glFenceSync(...) opengl::FunctionWrapper::wrFenceSync(__VA_ARGS__)
+#define glClientWaitSync(...) opengl::FunctionWrapper::wrClientWaitSync(__VA_ARGS__)
+#define glDeleteSync(...) opengl::FunctionWrapper::wrDeleteSync(__VA_ARGS__)
+
+#define glGetUniformBlockIndex(...) opengl::FunctionWrapper::wrGetUniformBlockIndex(__VA_ARGS__)
+#define glUniformBlockBinding(...) opengl::FunctionWrapper::wrUniformBlockBinding(__VA_ARGS__)
+#define glGetActiveUniformBlockiv(...) opengl::FunctionWrapper::wrGetActiveUniformBlockiv(__VA_ARGS__)
+#define glGetUniformIndices(...) opengl::FunctionWrapper::wrGetUniformIndices(__VA_ARGS__)
+#define glGetActiveUniformsiv(...) opengl::FunctionWrapper::wrGetActiveUniformsiv(__VA_ARGS__)
+#define glBindBufferBase(...) opengl::FunctionWrapper::wrBindBufferBase(__VA_ARGS__)
+#define glBufferSubData(...) opengl::FunctionWrapper::wrBufferSubData(__VA_ARGS__)
+
+#define glGetProgramBinary(...) opengl::FunctionWrapper::wrGetProgramBinary(__VA_ARGS__)
+#define glProgramBinary(...) opengl::FunctionWrapper::wrProgramBinary(__VA_ARGS__)
+#define glProgramParameteri(...) opengl::FunctionWrapper::wrProgramParameteri(__VA_ARGS__)
+
+#define glTexStorage2D(...) opengl::FunctionWrapper::wrTexStorage2D(__VA_ARGS__)
+#define glTextureStorage2D(...) opengl::FunctionWrapper::wrTextureStorage2D(__VA_ARGS__)
+#define glTextureSubImage2D(...) opengl::FunctionWrapper::wrTextureSubImage2D(__VA_ARGS__)
+#define glTextureStorage2DMultisample(...) opengl::FunctionWrapper::wrTextureStorage2DMultisample(__VA_ARGS__)
+#define glTextureParameteri(...) opengl::FunctionWrapper::wrTextureParameteri(__VA_ARGS__)
+#define glTextureParameterf(...) opengl::FunctionWrapper::wrTextureParameterf(__VA_ARGS__)
+#define glCreateTextures(...) opengl::FunctionWrapper::wrCreateTextures(__VA_ARGS__)
+#define glCreateBuffers(...) opengl::FunctionWrapper::wrCreateBuffers(__VA_ARGS__)
+#define glCreateFramebuffers(...) opengl::FunctionWrapper::wrCreateFramebuffers(__VA_ARGS__)
+#define glNamedFramebufferTexture(...) opengl::FunctionWrapper::wrNamedFramebufferTexture(__VA_ARGS__)
+#define glDrawRangeElementsBaseVertex(...) opengl::FunctionWrapper::wrDrawRangeElementsBaseVertex(__VA_ARGS__)
+#define glFlushMappedBufferRange(...) opengl::FunctionWrapper::wrFlushMappedBufferRange(__VA_ARGS__)
+#define glTextureBarrier(...) opengl::FunctionWrapper::wrTextureBarrier(__VA_ARGS__)
+#define glTextureBarrierNV(...) opengl::FunctionWrapper::wrTextureBarrierNV(__VA_ARGS__)
+#define glClearBufferfv(...) opengl::FunctionWrapper::wrClearBufferfv(__VA_ARGS__)
+#define glEnablei(...) opengl::FunctionWrapper::wrEnablei(__VA_ARGS__)
+#define glDisablei(...) opengl::FunctionWrapper::wrDisablei(__VA_ARGS__)
+#define glEGLImageTargetTexture2DOES(...) opengl::FunctionWrapper::wrEGLImageTargetTexture2DOES(__VA_ARGS__)
+
+#include "Graphics/OpenGLContext/ThreadedOpenGl/opengl_Wrapper.h"
 
 #endif // GLFUNCTIONS_H
