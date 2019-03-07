@@ -9,7 +9,7 @@ void OpenGlCommand::performCommandSingleThreaded() {
     setInUse(false);
 #ifdef GL_DEBUG
     if (m_isGlCommand) {
-        auto error = g_glGetError();
+        auto error = ptrGetError();
         if (error != GL_NO_ERROR) {
             std::stringstream errorString;
             errorString << " OpenGL error: 0x" << std::hex << error << ", on function: " << m_functionName;
