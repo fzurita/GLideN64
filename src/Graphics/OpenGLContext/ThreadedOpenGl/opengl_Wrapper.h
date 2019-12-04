@@ -35,7 +35,7 @@ namespace opengl {
 		static std::mutex m_condvarMutex;
 		static std::condition_variable m_condition;
 
-#if defined(GL_DEBUG) && defined(GL_PROFILE)
+#if defined(GL_DEBUG) || defined(GL_PROFILE)
 		static void logProfilingData();
 
 		struct FunctionProfilingData

@@ -36,7 +36,7 @@ namespace opengl {
 		std::unique_lock<std::mutex> lock(m_condvarMutex);
 		performCommandSingleThreaded();
 		if (m_synced) {
-#ifdef GL_DEBUG
+#if defined(GL_DEBUG) || defined (GL_PROFILE)
 			if (m_logIfSynced) {
 				std::stringstream errorString;
 				errorString << " Executing synced: " << m_functionName;
@@ -58,7 +58,7 @@ namespace opengl {
 
 		m_executed = false;
 	}
-#ifdef GL_DEBUG
+#if defined(GL_DEBUG) || defined (GL_PROFILE)
 	std::string OpenGlCommand::getFunctionName()
 	{
 		return m_functionName;
@@ -67,7 +67,7 @@ namespace opengl {
 	OpenGlCommand::OpenGlCommand(bool _synced, bool _logIfSynced, const std::string &_functionName,
 		bool _isGlCommand) :
 		m_synced(_synced), m_executed(false)
-#ifdef GL_DEBUG
+#if defined(GL_DEBUG) || defined (GL_PROFILE)
 		, m_logIfSynced(_logIfSynced)
 		, m_functionName(std::move(_functionName))
 		, m_isGlCommand(_isGlCommand)

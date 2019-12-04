@@ -13,7 +13,7 @@ namespace opengl {
 	std::thread FunctionWrapper::m_commandExecutionThread;
 	std::mutex FunctionWrapper::m_condvarMutex;
 	std::condition_variable FunctionWrapper::m_condition;
-#if defined(GL_DEBUG) && defined(GL_PROFILE)
+#if defined(GL_DEBUG) || defined(GL_PROFILE)
 	std::map<std::string, FunctionWrapper::FunctionProfilingData> FunctionWrapper::m_functionProfiling;
 	std::chrono::time_point<std::chrono::high_resolution_clock> FunctionWrapper::m_lastProfilingOutput;
 #endif
@@ -23,12 +23,8 @@ namespace opengl {
 
 	void FunctionWrapper::executeCommand(std::shared_ptr<OpenGlCommand> _command)
 	{
-#if !defined(GL_DEBUG)
-		m_commandQueue.enqueue(_command);
-		_command->waitOnCommand();
-#elif !defined(GL_PROFILE)
-		_command->performCommandSingleThreaded();
-#else
+
+#if defined(GL_DEBUG) || defined (GL_PROFILE)
 		auto callStartTime = std::chrono::high_resolution_clock::now();
 		_command->performCommandSingleThreaded();
 		std::chrono::duration<double> callDuration = std::chrono::high_resolution_clock::now() - callStartTime;
@@ -37,18 +33,15 @@ namespace opengl {
 		m_functionProfiling[_command->getFunctionName()].m_totalTime += callDuration.count();
 
 		logProfilingData();
+#else
+		m_commandQueue.enqueue(_command);
+		_command->waitOnCommand();
 #endif
 	}
 
 	void FunctionWrapper::executePriorityCommand(std::shared_ptr<OpenGlCommand> _command)
 	{
-#if !defined(GL_DEBUG)
-		m_commandQueueHighPriority.enqueue(_command);
-		m_commandQueue.enqueue(nullptr);
-		_command->waitOnCommand();
-#elif !defined(GL_PROFILE)
-                _command->performCommandSingleThreaded();
-#else
+#if defined(GL_DEBUG) || defined (GL_PROFILE)
 		auto callStartTime = std::chrono::high_resolution_clock::now();
 		_command->performCommandSingleThreaded();
 		std::chrono::duration<double> callDuration = std::chrono::high_resolution_clock::now() - callStartTime;
@@ -57,6 +50,10 @@ namespace opengl {
 		m_functionProfiling[_command->getFunctionName()].m_totalTime += callDuration.count();
 
 		logProfilingData();
+#else
+		m_commandQueueHighPriority.enqueue(_command);
+		m_commandQueue.enqueue(nullptr);
+		_command->waitOnCommand();
 #endif
 	}
 
@@ -79,7 +76,7 @@ namespace opengl {
 		}
 	}
 
-#if defined(GL_DEBUG) && defined(GL_PROFILE)
+#if defined(GL_PROFILE)
 	void FunctionWrapper::logProfilingData()
 	{
 		std::chrono::duration<double> timeSinceLastOutput = std::chrono::high_resolution_clock::now() - m_lastProfilingOutput;
@@ -99,13 +96,17 @@ namespace opengl {
 			std::set<std::pair<std::string, FunctionProfilingData>, Comparator> functionSet(m_functionProfiling.begin(), m_functionProfiling.end(), compFunctor);
 
 			LOG(LOG_ERROR, "Profiling output");
+			unsigned int totalCallCount = 0;
 			for ( auto element : functionSet ) {
 				std::stringstream output;
 				output << element.first << ": call_count=" << element.second.m_callCount
 					   << " duration=" << element.second.m_totalTime
 					   << " average_per_call=" << element.second.m_totalTime/element.second.m_callCount;
 				LOG(LOG_ERROR, output.str().c_str());
+
+				totalCallCount += element.second.m_callCount;
 			}
+			LOG(LOG_ERROR, "Total calls = %u", totalCallCount);
 
 			m_functionProfiling.clear();
 			m_lastProfilingOutput = std::chrono::high_resolution_clock::now();
@@ -118,10 +119,11 @@ namespace opengl {
 #ifdef GL_DEBUG
 		m_threaded_wrapper = true;
 		m_shutdown = false;
+#else
+
 #ifdef GL_PROFILE
 		m_lastProfilingOutput = std::chrono::high_resolution_clock::now();
 #endif
-#else
 		if (_threaded == 1) {
 			m_threaded_wrapper = true;
 			m_shutdown = false;

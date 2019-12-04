@@ -18,7 +18,7 @@ namespace opengl {
 		void performCommand();
 
 		void waitOnCommand();
-#ifdef GL_DEBUG
+#if defined(GL_DEBUG) || defined (GL_PROFILE)
 		std::string getFunctionName();
 #endif
 
@@ -44,7 +44,7 @@ namespace opengl {
 			return std::static_pointer_cast<CoomandType>(poolObject);
 		}
 
-#ifdef GL_DEBUG
+#if defined(GL_DEBUG) || defined (GL_PROFILE)
 		const bool m_logIfSynced;
 		const std::string m_functionName;
 		const bool m_isGlCommand;
