@@ -439,6 +439,10 @@ if(GL_PROFILE)
     )
 endif(GL_PROFILE)
 
+add_definitions(
+        -DGL_DEBUG
+)
+
 if(EGL)
   add_definitions(
     -DEGL
